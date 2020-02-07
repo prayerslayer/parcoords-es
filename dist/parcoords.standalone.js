@@ -1991,6 +1991,44 @@
       return target;
     };
 
+    var slicedToArray = function () {
+      function sliceIterator(arr, i) {
+        var _arr = [];
+        var _n = true;
+        var _d = false;
+        var _e = undefined;
+
+        try {
+          for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+            _arr.push(_s.value);
+
+            if (i && _arr.length === i) break;
+          }
+        } catch (err) {
+          _d = true;
+          _e = err;
+        } finally {
+          try {
+            if (!_n && _i["return"]) _i["return"]();
+          } finally {
+            if (_d) throw _e;
+          }
+        }
+
+        return _arr;
+      }
+
+      return function (arr, i) {
+        if (Array.isArray(arr)) {
+          return arr;
+        } else if (Symbol.iterator in Object(arr)) {
+          return sliceIterator(arr, i);
+        } else {
+          throw new TypeError("Invalid attempt to destructure non-iterable instance");
+        }
+      };
+    }();
+
     function object (a, b) {
       var i = {},
           c = {},
@@ -7691,8 +7729,6 @@
     var saturday = weekday(6);
 
     var sundays = sunday.range;
-    var mondays = monday.range;
-    var thursdays = thursday.range;
 
     var month = newInterval(function (date) {
       date.setDate(1);
@@ -7782,8 +7818,6 @@
     var utcSaturday = utcWeekday(6);
 
     var utcSundays = utcSunday.range;
-    var utcMondays = utcMonday.range;
-    var utcThursdays = utcThursday.range;
 
     var utcMonth = newInterval(function (date) {
       date.setUTCDate(1);
@@ -10460,6 +10494,28 @@
       return h(config) + 1;
     };
 
+    function triangleMarker(config, position, d, ctx) {
+      var markerPositions = Object.keys(config.dimensions).map(function (p) {
+        return [position(p), d[p] === undefined ? getNullPosition(config) : config.dimensions[p].yscale(d[p])];
+      });
+      var s = config.triangleSideLength;
+      var h$$1 = config.triangleDistanceToAxis;
+      markerPositions.forEach(function (_ref) {
+        var _ref2 = slicedToArray(_ref, 2),
+            x = _ref2[0],
+            y = _ref2[1];
+
+        ctx.beginPath();
+        ctx.moveTo(x + h$$1, y);
+        ctx.lineWidth = config.triangleLineWidth(d);
+        ctx.strokeStyle = config.triangleStroke(d);
+        ctx.lineTo(x + h$$1 + s, y - s / 2);
+        ctx.lineTo(x + h$$1 + s, y + s / 2);
+        ctx.fillStyle = config.triangleFill(d);
+        ctx.fill();
+      });
+    }
+
     var singlePath = function singlePath(config, position, d, ctx) {
       Object.keys(config.dimensions).map(function (p) {
         return [position(p), d[p] === undefined ? getNullPosition(config) : config.dimensions[p].yscale(d[p])];
@@ -10489,8 +10545,12 @@
 
     var pathMark = function pathMark(config, ctx, position) {
       return function (d, i) {
-        ctx.marked.strokeStyle = _functor(config.color)(d, i);
-        return colorPath(config, position, d, ctx.marked);
+        if (config.markingMode === 'path') {
+          return colorPath(config, position, d, ctx.marked);
+        }
+        if (config.markingMode === 'triangle') {
+          return triangleMarker(config, position, d, ctx.marked);
+        }
       };
     };
 
@@ -10659,7 +10719,9 @@
 
         // add array to already marked data
         config.marked = config.marked.concat(data);
-        selectAll([canvas.foreground, canvas.brushed]).classed('dimmed', true);
+        if (config.markingMode === 'path') {
+          selectAll([canvas.foreground, canvas.brushed]).classed('dimmed', true);
+        }
         data.forEach(pathMark(config, ctx, position));
         events.call('mark', this, data);
         return this;
@@ -10854,9 +10916,21 @@
       lineWidth: 1.4,
       highlightedLineWidth: 3,
       mode: 'default',
+      markingMode: 'path', // set to "triangle" for the other
       markedLineWidth: 3,
       markedShadowColor: '#ffffff',
       markedShadowBlur: 10,
+      triangleStroke: function triangleStroke() {
+        return 'black';
+      },
+      triangleLineWidth: function triangleLineWidth() {
+        return 0;
+      },
+      triangleFill: function triangleFill() {
+        return 'black';
+      },
+      triangleSideLength: 5,
+      triangleDistanceToAxis: 2,
       rate: 20,
       width: 600,
       height: 300,

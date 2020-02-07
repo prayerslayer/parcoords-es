@@ -1,9 +1,13 @@
-import colorPath from '../util/colorPath';
+import colorPath , {triangleMarker}from '../util/colorPath';
 import functor from '../util/functor';
 
 const pathMark = (config, ctx, position) => (d, i) => {
-  ctx.marked.strokeStyle = functor(config.color)(d, i);
-  return colorPath(config, position, d, ctx.marked);
+  if (config.markingMode === 'path') {
+    return colorPath(config, position, d, ctx.marked);
+  }
+  if (config.markingMode === 'triangle') {
+    return triangleMarker(config, position, d, ctx.marked);
+  }
 };
 
 const renderMarkedDefault = (config, pc, ctx, position) => () => {

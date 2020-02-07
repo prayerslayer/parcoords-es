@@ -11,7 +11,9 @@ const mark = (config, pc, canvas, events, ctx, position) =>
 
     // add array to already marked data
     config.marked = config.marked.concat(data);
-    selectAll([canvas.foreground, canvas.brushed]).classed('dimmed', true);
+    if (config.markingMode === 'path') {
+      selectAll([canvas.foreground, canvas.brushed]).classed('dimmed', true);
+    }
     data.forEach(pathMark(config, ctx, position));
     events.call('mark', this, data);
     return this;

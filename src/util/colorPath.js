@@ -40,6 +40,29 @@ const getNullPosition = config => {
   return h(config) + 1;
 };
 
+export function triangleMarker(config, position, d, ctx) {
+  const markerPositions = Object.keys(config.dimensions)
+  .map(p => [
+    position(p),
+    d[p] === undefined
+    ? getNullPosition(config)
+    : config.dimensions[p].yscale(d[p]),
+  ])
+  const s = config.triangleSideLength
+  const h = config.triangleDistanceToAxis
+  markerPositions.forEach(([x, y]) => {
+    ctx.beginPath()
+    ctx.moveTo(x + h, y)
+    ctx.lineWidth = config.triangleLineWidth(d)
+    ctx.strokeStyle = config.triangleStroke(d)
+    ctx.lineTo(x + h + s, y-s/2)
+    ctx.lineTo(x + h + s, y+s/2)
+    ctx.fillStyle = config.triangleFill(d);
+    ctx.fill()
+  })
+}
+
+
 const singlePath = (config, position, d, ctx) => {
   Object.keys(config.dimensions)
     .map(p => [
