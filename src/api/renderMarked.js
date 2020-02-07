@@ -1,4 +1,4 @@
-import colorPath , {triangleMarker}from '../util/colorPath';
+import colorPath, { triangleMarker } from '../util/colorPath';
 import functor from '../util/functor';
 
 const pathMark = (config, ctx, position) => (d, i) => {
