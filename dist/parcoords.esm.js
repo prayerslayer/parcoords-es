@@ -3767,8 +3767,8 @@ function triangleMarker(config, position, d, ctx) {
   var markerPositions = Object.keys(config.dimensions).map(function (p) {
     return [position(p), d[p] === undefined ? getNullPosition(config) : config.dimensions[p].yscale(d[p])];
   });
-  var s = config.triangleSideLength;
-  var h$$1 = config.triangleDistanceToAxis;
+  var s = config.triangleSideLength(d);
+  var h$$1 = config.triangleDistanceToAxis(d);
   markerPositions.forEach(function (_ref) {
     var _ref2 = slicedToArray(_ref, 2),
         x = _ref2[0],
@@ -4198,8 +4198,12 @@ var DefaultConfig = {
   triangleFill: function triangleFill() {
     return 'black';
   },
-  triangleSideLength: 5,
-  triangleDistanceToAxis: 2,
+  triangleSideLength: function triangleSideLength() {
+    return 5;
+  },
+  triangleDistanceToAxis: function triangleDistanceToAxis() {
+    return 2;
+  },
   rate: 20,
   width: 600,
   height: 300,

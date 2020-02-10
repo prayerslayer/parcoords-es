@@ -47,8 +47,8 @@ export function triangleMarker(config, position, d, ctx) {
       ? getNullPosition(config)
       : config.dimensions[p].yscale(d[p]),
   ]);
-  const s = config.triangleSideLength;
-  const h = config.triangleDistanceToAxis;
+  const s = config.triangleSideLength(d);
+  const h = config.triangleDistanceToAxis(d);
   markerPositions.forEach(([x, y]) => {
     ctx.beginPath();
     ctx.moveTo(x + h, y);
